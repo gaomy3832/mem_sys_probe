@@ -1,15 +1,30 @@
+#ifdef _MSC_VER
 #include "stdafx.h"
 #include <stdio.h>
 #include <time.h>
+#else
+#include <stdio.h>
+#include <sys/time.h>
+#endif
+
 #define ARRAY_MIN (1024) /* 1/4 smallest cache */
 #define ARRAY_MAX (4096*4096) /* 1/4 largest cache */
 int x[ARRAY_MAX]; /* array going to stride through */
- 
+
+#ifdef _MSC_VER
 double get_seconds() { /* routine to read time in seconds */
   __time64_t ltime;
   _time64( &ltime );
   return (double) ltime;
 }
+#else
+double get_seconds() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec + tv.tv_usec / 1e6;
+}
+#endif
+
 int label(int i) {/* generate text labels */
   if (i<1e3) printf("%1dB,",i);
   else if (i<1e6) printf("%1dK,",i/1024);
@@ -17,7 +32,12 @@ int label(int i) {/* generate text labels */
   else printf("%1dG,",i/1073741824);
   return 0;
 }
+
+#ifdef _MSC_VER
 int _tmain(int argc, _TCHAR* argv[]) {
+#else
+int main(int argc, char* argv[]) {
+#endif
 int register nextstep, i, index, stride;
 int csize;
 double steps, tsteps;
@@ -58,7 +78,7 @@ for (csize=ARRAY_MIN; csize <= ARRAY_MAX; csize=csize*2) {
       sec1 = get_seconds(); /* end timer */
     } while ((sec1 - sec0) < 20.0); /* collect 20 seconds */
     sec = sec1 - sec0;
- 
+
     /* Repeat empty loop to loop subtract overhead */
     tsteps = 0.0; /* used to match no. while iterations */
     sec0 = get_seconds(); /* start timer */
@@ -75,9 +95,9 @@ for (csize=ARRAY_MIN; csize <= ARRAY_MAX; csize=csize*2) {
     loadtime = (sec*1e9)/(steps*csize);
     /* write out results in .csv format for Excel */
     printf("%4.1f,", (loadtime<0.1) ? 0.1 : loadtime);
-    }; /* end of inner for loop */
-    printf("\n");
-  }; /* end of outer for loop */
-  return 0;
+  }; /* end of inner for loop */
+  printf("\n");
+}; /* end of outer for loop */
+return 0;
 }
 
