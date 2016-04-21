@@ -10,6 +10,8 @@ BINDIR := bin
 
 PROG := aca_ch2_cs2
 
+CFLAGS = -O0 -g
+
 ifneq (0,$(HUGEPAGE))
   LDFLAGS = -B $(LIBHUGETLBFSDIR)/share/libhugetlbfs \
 			-Wl,--hugetlbfs-align \
