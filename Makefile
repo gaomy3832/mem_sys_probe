@@ -1,4 +1,5 @@
 
+DISABLE_PREFETCH ?= 0
 
 HUGEPAGE ?= 0
 LIBHUGETLBFSDIR ?= /usr/local
@@ -35,6 +36,9 @@ $(BINDIR):
 ################################################################################
 
 run: $(BINDIR)/$(PROG)
+ifneq (0,$(DISABLE_PREFETCH))
+	@./scripts/prefetch_ctrl.sh -d
+endif
 ifneq (0,$(HUGEPAGE))
 	@./scripts/mount_hugetlbfs.sh -m
 	@LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LIBHUGETLBFSDIR)/lib64 \
@@ -45,6 +49,9 @@ ifneq (0,$(HUGEPAGE))
 	@./scripts/mount_hugetlbfs.sh -u
 else
 	@$(BINDIR)/$(PROG)
+endif
+ifneq (0,$(DISABLE_PREFETCH))
+	@./scripts/prefetch_ctrl.sh -e
 endif
 
 
@@ -62,6 +69,7 @@ run: check_libhugetlbfs
 clean:
 	@$(RM) -rf $(BINDIR)
 	@./scripts/mount_hugetlbfs.sh -u
+	@./scripts/prefetch_ctrl.sh -e
 
 .PHONY: clean check_libhugetlbfs run
 
