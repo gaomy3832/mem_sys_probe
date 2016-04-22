@@ -10,6 +10,7 @@ mnt() {
 umt() {
     if $( mountpoint -q ${mntpnt} ); then
         sudo umount ${mntpnt}
+        sleep 1   # wait for umount to finish, avoid device busy error
         rm -rf ${mntpnt}
         echo "Unmount ${mntpnt}"
     fi
