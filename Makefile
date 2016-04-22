@@ -18,8 +18,6 @@ ifneq (0,$(HUGEPAGE))
 			-L$(LIBHUGETLBFSDIR)/lib64
 endif
 
-MNTHUGETLBFS := mnt-hugetlbfs
-
 ################################################################################
 
 default: $(BINDIR)/$(PROG)
@@ -38,16 +36,13 @@ $(BINDIR):
 
 run: $(BINDIR)/$(PROG)
 ifneq (0,$(HUGEPAGE))
-	@mkdir -p $(MNTHUGETLBFS)
-	@sudo mount -t hugetlbfs none $(MNTHUGETLBFS) \
-		-o uid=$(shell id -u),gid=$(shell id -g)
+	@./scripts/mount_hugetlbfs.sh -m
 	@LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LIBHUGETLBFSDIR)/lib64 \
 		$(LIBHUGETLBFSDIR)/bin/hugectl --text --data --bss $(BINDIR)/$(PROG) \
 		|| { echo -e "\nEnsure enough huge pages in the pool.\n"; \
 		$(LIBHUGETLBFSDIR)/bin/hugeadm --pool-list; \
 		exit 1; }
-	@sudo umount $(MNTHUGETLBFS)
-	@rm -rf $(MNTHUGETLBFS)
+	@./scripts/mount_hugetlbfs.sh -u
 else
 	@$(BINDIR)/$(PROG)
 endif
@@ -66,8 +61,7 @@ run: check_libhugetlbfs
 
 clean:
 	@$(RM) -rf $(BINDIR)
-	@sudo umount $(MNTHUGETLBFS)
-	@rm -rf $(MNTHUGETLBFS)
+	@./scripts/mount_hugetlbfs.sh -u
 
 .PHONY: clean check_libhugetlbfs run
 
