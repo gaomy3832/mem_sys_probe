@@ -39,7 +39,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char* argv[]) {
 #endif
 int register nextstep, i, index, stride;
-int csize;
+int register csize;
 double steps, tsteps;
 double loadtime, lastsec, sec0, sec1, sec; /* timing variables */
 
@@ -70,7 +70,7 @@ for (csize=ARRAY_MIN; csize <= ARRAY_MAX; csize=csize*2) {
     sec0 = get_seconds(); /* start timer */
     do { /* repeat until collect 20 seconds */
       for (i=stride;i!=0;i=i-1) { /* keep samples same */
-        nextstep = 0;
+        nextstep %= csize;
         do nextstep = x[nextstep]; /* dependency */
         while (nextstep != 0);
       }
@@ -81,10 +81,11 @@ for (csize=ARRAY_MIN; csize <= ARRAY_MAX; csize=csize*2) {
 
     /* Repeat empty loop to loop subtract overhead */
     tsteps = 0.0; /* used to match no. while iterations */
+    index = 0; /* start at beginning of path */
     sec0 = get_seconds(); /* start timer */
     do { /* repeat until same no. iterations as above */
       for (i=stride;i!=0;i=i-1) { /* keep samples same */
-        index = 0;
+        index %= csize;
         do index = index + stride;
         while (index < csize);
       }
